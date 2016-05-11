@@ -18,7 +18,7 @@
         "description": "Salesforce password for your integration user",
         "value":""
     },
-    "SF_SLACK_BOT_TOKEN": {
+    "SLACK_BOT_TOKEN": {
         "description": "Slack token for the case slash command",
         "value":""
     	}
