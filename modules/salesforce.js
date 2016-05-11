@@ -18,6 +18,7 @@ bot.startRTM(err => {
     }
 });
 
+
 controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (bot, message) => {
 	
    let help;
