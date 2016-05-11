@@ -18,6 +18,20 @@ bot.startRTM(err => {
     }
 });
 
+http = require 'http'
+request = require 'request'
+
+
+strobe = ()->
+  request 'https://sbotcliff.herokuapp.com/', (e,r,b)->
+
+slack.on 'open', ->
+  setInterval strobe, 25*60*1000
+  console.log "I am up!!"
+
+handle = (req, res) -> res.end "42"
+server = http.createServer handle
+server.listen process.env.PORT || 5000
 
 controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (bot, message) => {
 	
