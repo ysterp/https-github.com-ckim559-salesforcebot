@@ -23,7 +23,7 @@ request = require 'request'
 
 
 strobe = ()->
-  request 'https://random.herokuapp.com/', (e,r,b)->
+  request 'https://salesforcebot.herokuapp.com/', (e,r,b)->
 
 slack.on 'open', ->
   setInterval strobe, 25*60*1000
