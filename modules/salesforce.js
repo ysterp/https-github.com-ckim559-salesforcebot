@@ -142,7 +142,7 @@ let findContact3 = (account, name) => {
 let findOpportunity = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Type, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Name LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
+        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Opp_Type__c, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Name LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 reject("An error as occurred");
@@ -157,7 +157,7 @@ let findOpportunity = name => {
 let findOpportunity2 = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Type, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Opportunity_Owner__c LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
+        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Opp_Type__c, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Opportunity_Owner__c LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 reject("An error as occurred");
@@ -172,7 +172,7 @@ let findOpportunity2 = name => {
 let findOpportunity3 = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Type, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Opp_Account_Name_API__c LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
+        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Opp_Type__c, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Opp_Account_Name_API__c LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 reject("An error as occurred");
