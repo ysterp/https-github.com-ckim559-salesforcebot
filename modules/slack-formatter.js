@@ -50,8 +50,8 @@ let formatContact = contact => {
     fields.push({title: "Link", value: "https://login.salesforce.com/" + contact.getId(), short:true});
     fields.push({title: "Title", value: contact.get("Title"), short:true});
     fields.push({title: "Account:", value: contact.get("Account_Name_API__c"), short:true});
-	fields.push({title: "Email", value: contact.get("Email"), short:true});
-	fields.push({title: "Mobile", value: contact.get("MobilePhone"), short:true});
+    fields.push({title: "Email", value: contact.get("Email"), short:true});
+    fields.push({title: "Mobile", value: contact.get("MobilePhone"), short:true});
     return [{color: color, fields: fields}];
 
 };
@@ -64,12 +64,12 @@ let formatOpportunities = opportunities => {
             let fields = [];
             fields.push({title: "Opportunity", value: opportunity.get("Name"), short:true});
             fields.push({title: "Link", value: "https://login.salesforce.com/" + opportunity.getId(), short:true});
-			fields.push({title: "Account", value: opportunity.get("Opp_Account_Name_API__c"), short:true});
-			fields.push({title: "Opportunity Owner", value: opportunity.get("Opportunity_Owner__c"), short:true});
+	    fields.push({title: "Account", value: opportunity.get("Opp_Account_Name_API__c"), short:true});
+	    fields.push({title: "Opportunity Owner", value: opportunity.get("Opportunity_Owner__c"), short:true});
             fields.push({title: "Stage", value: opportunity.get("StageName"), short:true});
             fields.push({title: "Close Date", value: opportunity.get("CloseDate"), short:true});
-			fields.push({title: "Record Type", value: opportunity.get("Opportunity_Record_Type__c"), short:true});
-			fields.push({title: "Opportunity Type", value: opportunity.get("Opp_Type__c"), short:true});
+	    fields.push({title: "Record Type", value: opportunity.get("Opportunity_Record_Type__c"), short:true});
+	    fields.push({title: "Opportunity Type", value: opportunity.get("Opp_Type__c"), short:true});
             attachments.push({color: color, fields: fields});
         });
         return attachments;
