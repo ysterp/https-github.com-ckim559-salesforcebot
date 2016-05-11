@@ -18,6 +18,7 @@ bot.startRTM(err => {
     }
 });
 
+
 controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (bot, message) => {
 	
    let help;
@@ -30,9 +31,9 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
 	{
 		bot.reply(message, {
         text: `Account Requests:
-	- To search for an account you can ask me things like "Search account Freewheel" or "#A Freewheel"
-	- To search for an account by owner, ask me "Search accounts owned by Jeff Smith or "#AO Jeff Smith"
-	- For advanced search type "Account Search" or "+AS"`
+	- To search for an account you can ask me things like "Search account Freewheel" or #A Freewheel.
+	- To search for an account by owner, ask me "Search accounts owned by Jeff Smith"
+	- For advanced search type "Account Search" or "#Account"`
 		});
 		convo.next();
 	}
@@ -40,9 +41,9 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
 	{
 		bot.reply(message, {
 		text: `Opportunity Requests:
-	- To search for an opportunity you can ask me things like "Search opportunity NBC" or "#O NBC"
-	- To search for an opportunity by owner, ask me "Search opportunities owned by Jeff Smith" or "#OO Jeff Smith"
-	- For advanced search type "Opportunity Search" or "#OS"`
+	- To search for an opportunity you can ask me things like "Search opportunity NBC" or #O NBC.
+	- To search for an opportunity by owner, ask me "Search opportunities owned by Jeff Smith"
+	- For advanced search type "Opportunity Search" or "#Opportunities"`
 		});
 		convo.next();
 	} 
@@ -50,9 +51,8 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
 	{
 		bot.reply(message, {
 		text: `Contact Requests:
-	- To search for a contact you can ask me things like "Search contact Lisa Smith" or "#C Lisa Smith"
-	- To search for a contact in an account, ask me "Search contacts in account Twitter" or "#CO Twitter"
-	- For advanced search type "Contact Search" or "#CS"`
+	- To search for a contact you can ask me things like "Search contact Lisa Smith" or "#C Lisa Smith".
+	- To search for a contact in an account, ask me "Search contacts in account Twitter"`
 		});
 		convo.next();
 	}
@@ -74,7 +74,7 @@ controller.hears(['hello', 'hi', 'hey', 'greetings'], 'direct_message,direct_men
     });
 });
 
-controller.hears(['Account Search', 'Accounts', 'Account', '+AS'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['Account Search', '#Accounts', '#Account'], 'direct_message,direct_mention,mention', (bot, message) => {
 
   let name,
 	  type,
@@ -134,7 +134,6 @@ controller.hears(['Account Search', 'Accounts', 'Account', '+AS'], 'direct_messa
 		});
 
    };
-  
    
    let askOwner = (response, convo) => {
 	   convo.ask("Who is the Account Owner? (or enter '%' for all owners)", (response, convo) => {
@@ -173,60 +172,7 @@ controller.hears(['Account Search', 'Accounts', 'Account', '+AS'], 'direct_messa
  
 });
 
-controller.hears(['Contact Search', '#Contacts', '#Contact', '#cs'], 'direct_message,direct_mention,mention', (bot, message) => {
-
-  let name,
-	  account;
-
-   let askName = (response, convo) => {
-
-        convo.ask("What is the contact's name? (or enter '%' for all contacts)", (response, convo) => {
-		if(name == '%' || name == "'%'")
-		{
-			name = '%'
-		}
-		else
-		{
-			name = response.text; 
-		}
-		askAccount(response, convo);
-		convo.next();
-		});
-
-   };
-   
-   let askAccount = (response, convo) => {
-	   convo.ask("What is the account name? (or enter '%' for all accounts)", (response, convo) => {
-		   account = response.text;
-		   
-		   if(account == '%' || account == "'%'")
-			{
-				account = '%'; 
-			}
-			else 
-			{
-				account = response.text;
-			};	
-			
-
-			salesforce.findContact3(account, name)
-			.then(contacts => bot.reply(message, {
-			text: "Results:",
-			attachments: formatter.formatContacts(contacts)
-			}));
-			
-	
-			convo.next();
-	   });	
-
-	};		
-
- bot.reply(message, "OK, I can help you with that!");
- bot.startConversation(message, askName);	
- 
-});
-
-controller.hears(['Opportunity Search', '#Opportunity', '#Opportunities', '#os'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['Opportunity Search', '#Opportunity', '#Opportunities'], 'direct_message,direct_mention,mention', (bot, message) => {
 
   let name,
 	  owner,
@@ -360,7 +306,7 @@ controller.hears(['search account (.*)', 'search (.*) in accounts', '#a (.*)', '
         .catch(error => bot.reply(message, error));
 });
 
-controller.hears(['search accounts owned by (.*)', 'find accounts owned by (.*)', '#ao (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['search accounts owned by (.*)', 'find accounts owned by (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     let name = message.match[1];
     salesforce.findAccount2(name)
         .then(accounts => bot.reply(message, {
@@ -371,7 +317,7 @@ controller.hears(['search accounts owned by (.*)', 'find accounts owned by (.*)'
 });
 
 
-controller.hears(['search contact (.*)', 'find contact (.*)', '#c (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['search contact (.*)', 'find contact (.*)', '#C (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     let name = message.match[1];
     salesforce.findContact(name)
         .then(contacts => bot.reply(message, {
@@ -382,7 +328,7 @@ controller.hears(['search contact (.*)', 'find contact (.*)', '#c (.*)'], 'direc
 });
 
 
-controller.hears(['search contacts in Account (.*)', 'find contacts in Account (.*)', '#co (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['search contacts in Account (.*)', 'find contacts in Account (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     let name = message.match[1];
     salesforce.findContact2(name)
         .then(contacts => bot.reply(message, {
@@ -403,7 +349,7 @@ controller.hears(['top (.*) deals', 'top (.*) opportunities'], 'direct_message,d
         .catch(error => bot.reply(message, error));
 });
 
-controller.hears(['search opportunity (.*)', 'find opportunity (.*)', '#o (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['search opportunity (.*)', 'find opportunity (.*)', '#O (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     let name = message.match[1];
     salesforce.findOpportunity(name)
@@ -415,7 +361,7 @@ controller.hears(['search opportunity (.*)', 'find opportunity (.*)', '#o (.*)']
 
 });
 
-controller.hears(['search opportunities owned by (.*)', '#oo (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['search opportunities owned by (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     let name = message.match[1];
     salesforce.findOpportunity2(name)
