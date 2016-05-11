@@ -1,277 +1,549 @@
 "use strict";
 
-let nforce = require('nforce'),
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 
-    SF_CLIENT_ID = process.env.SF_CLIENT_ID,
-    SF_CLIENT_SECRET = process.env.SF_CLIENT_SECRET,
-    SF_USER_NAME = process.env.SF_USER_NAME,
-    SF_PASSWORD = process.env.SF_PASSWORD,
+let Botkit = require('botkit'),
+    formatter = require('./modules/slack-formatter'),
+    salesforce = require('./modules/salesforce'),
 
-    org = nforce.createConnection({
-        clientId: SF_CLIENT_ID,
-        clientSecret: SF_CLIENT_SECRET,
-        redirectUri: 'http://localhost:3000/oauth/_callback',
-        mode: 'single',
-        autoRefresh: true
+    controller = Botkit.slackbot(),
+
+    bot = controller.spawn({
+        token: SLACK_BOT_TOKEN
     });
 
-let login = () => {
+bot.startRTM(err => {
+    if (err) {
+        throw new Error('Could not connect to Slack');
+    }
+});
 
-    org.authenticate({username: SF_USER_NAME, password: SF_PASSWORD}, err => {
-        if (err) {
-            console.error("Authentication error");
-            console.error(err);
-        } else {
-            console.log("Authentication successful");
-        }
+controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (bot, message) => {
+	
+   let help;
+	
+   let askHelp = (response, convo) => {
+        convo.ask("Help Categories:" + "\n" + "1. Accounts" + "\n" + "2. Opportunities" + "\n" + "3. Contacts", (response, convo) => {
+		help = response.text; 
+   
+   if(help.toUpperCase() == 'ACCOUNTS'|| help.toUpperCase() == '1. ACCOUNTS' || help == '1' || help == '1.')
+	{
+		bot.reply(message, {
+        text: `Account Requests:
+	- To search for an account you can ask me things like "Search account Freewheel" or "+A Freewheel"
+	- To search for an account by owner, ask me "Search accounts owned by Jeff Smith or "+AO Jeff Smith"
+	- For advanced search type "Account Search" or "+AS"`
+		});
+		convo.next();
+	}
+	else if(help.toUpperCase() == 'OPPORTUNITIES'|| help.toUpperCase() == '2. OPPORTUNITIES' || help == '2' || help == '2.')
+	{
+		bot.reply(message, {
+		text: `Opportunity Requests:
+	- To search for an opportunity you can ask me things like "Search opportunity NBC" or "+O NBC"
+	- To search for an opportunity by owner, ask me "Search opportunities owned by Jeff Smith" or "+OO Jeff Smith"
+	- For advanced search type "Opportunity Search" or "+OS"`
+		});
+		convo.next();
+	} 
+	else if(help.toUpperCase() == 'Contacts'|| help.toUpperCase() == '3. Contacts' || help == '3' || help == '3.')
+	{
+		bot.reply(message, {
+		text: `Contact Requests:
+	- To search for a contact you can ask me things like "Search contact Lisa Smith" or "+C Lisa Smith"
+	- To search for a contact in an account, ask me "Search contacts in account Twitter" or "+CO Twitter"
+	- For advanced search type "Contact Search" or "+CS"`
+		});
+		convo.next();
+	}
+	else
+	{
+		bot.reply(message, "Sorry that is not a valid option. Please try again.");
+					askHelp(response, convo);
+					convo.next();
+	}
+   });
+   };
+   bot.startConversation(message, askHelp);
+ 
+});
+
+controller.hears(['hello', 'hi', 'hey', 'greetings'], 'direct_message,direct_mention,mention', (bot, message) => {
+    bot.reply(message, {
+        text: `Hello, I'm Salesforce bot! I help with various Salesforce requests. To learn more please type 'help'.`
     });
+});
 
-};
+controller.hears(['Account Search', '+Accounts', '+Account', '+as'], 'direct_message,direct_mention,mention', (bot, message) => {
 
-let findAccount = name => {
+  let name,
+	  type,
+	  owner;
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Phone, Account_Owner__c , Type , BillingStreet, BillingCity, BillingState FROM Account WHERE Name LIKE '%" + name + "%' LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                console.log(err);
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
+   let askName = (response, convo) => {
+
+        convo.ask("What is the Account Name? (or enter '%' for all accounts)", (response, convo) => {
+		if(name == '%' || name == "'%'")
+		{
+			name = '%'
+		}
+		else
+		{
+			name = response.text; 
+		}
+		askType(response, convo);
+		convo.next();
+		});
+
+   };
+   
+   let askType = (response, convo) => {
+
+        convo.ask("What is the Account Type?:" + "\n" + "1. All" + "\n" + "2. Prospect" + "\n" + "3. Client" + "\n" + "4. Former Client", (response, convo) => {
+		type = response.text; 
+		if(type.toUpperCase() == 'ALL' || type.toUpperCase() == '1. ALL' || type == '1' || type == '1.')
+			{
+				type = '%'; 
+				askOwner(response, convo);
+				convo.next();
+			}
+		else if(type.toUpperCase() == 'PROSPECT' || type.toUpperCase() == '2. PROSPECT' || type == '2' || type == '2.')
+			{
+				type = 'Prospect';
+				askOwner(response, convo);
+				convo.next();
+			}
+		else if(type.toUpperCase() == 'CLIENT' || type.toUpperCase() == '3. CLIENT' || type == '3' || type == '3.')
+			{
+				type = 'Client';
+				askOwner(response, convo);
+				convo.next();
+			}
+		else if(type.toUpperCase() == 'FORMER CLIENT' || type.toUpperCase() == '4. FORMER CLIENT' || type == '4' || type == '4.')
+			{
+				type = 'Former Client';
+				askOwner(response, convo);
+				convo.next();
+			}	
+		else 
+			{
+				bot.reply(message, "Sorry that is not a valid option. Please try again.");
+				askType(response, convo);
+				convo.next();
+			};	
+		});
+
+   };
+  
+   
+   let askOwner = (response, convo) => {
+	   convo.ask("Who is the Account Owner? (or enter '%' for all owners)", (response, convo) => {
+		   owner = response.text;
+		   
+		   if(owner == '%' || owner == "'%'")
+			{
+			owner = '%'; 
+			}
+		else {
+		 owner = response.text;
+			};	
+			if(type == '%')
+			{
+				salesforce.findAccount3(owner, name)
+				.then(accounts => bot.reply(message, {
+				text: "Results:",
+				attachments: formatter.formatAccounts(accounts)
+				}));
+			}
+			else
+				{
+				salesforce.findAccount4(owner, name, type)
+				.then(accounts => bot.reply(message, {
+				text: "Results:",
+				attachments: formatter.formatAccounts(accounts)
+				}));
+				}
+			convo.next();
+	   });	
+
+	};		
+
+ bot.reply(message, "OK, I can help you with that!");
+ bot.startConversation(message, askName);	
+ 
+});
+
+controller.hears(['Contact Search', '+Contacts', '+Contact', '+cs'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+  let name,
+	  account;
+
+   let askName = (response, convo) => {
+
+        convo.ask("What is the contact's name? (or enter '%' for all contacts)", (response, convo) => {
+		if(name == '%' || name == "'%'")
+		{
+			name = '%'
+		}
+		else
+		{
+			name = response.text; 
+		}
+		askAccount(response, convo);
+		convo.next();
+		});
+
+   };
+   
+   let askAccount = (response, convo) => {
+	   convo.ask("What is the account name? (or enter '%' for all accounts)", (response, convo) => {
+		   account = response.text;
+		   
+		   if(account == '%' || account == "'%'")
+			{
+				account = '%'; 
+			}
+			else 
+			{
+				account = response.text;
+			};	
+			
+
+			salesforce.findContact3(account, name)
+			.then(contacts => bot.reply(message, {
+			text: "Results:",
+			attachments: formatter.formatContacts(contacts)
+			}));
+			
+	
+			convo.next();
+	   });	
+
+	};		
+
+ bot.reply(message, "OK, I can help you with that!");
+ bot.startConversation(message, askName);	
+ 
+});
+
+controller.hears(['Opportunity Search', '+Opportunity', '+Opportunities', '+os'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+  let name,
+	  owner,
+	  stage,
+	  type;
+
+   let askName = (response, convo) => {
+
+        convo.ask("What is the Account Name?  (or enter '%' for all Accounts)", (response, convo) => {
+		name = response.text; 
+		 if(name == '%' || name == "'%'")
+			{
+			name = '%'; 
+			}
+		else {
+		 owner = response.text;
+			};	
+		askOwner(response, convo);
+		convo.next();
+		});
+
+   };
+   
+   let askOwner = (response, convo) => {
+	   convo.ask("Who is the Opportunity Owner? (or enter '%' for all owners)", (response, convo) => {
+		   owner = response.text;
+		   
+		   if(owner == '%' || owner == "'%'")
+			{
+			owner = '%'; 
+			}
+		else {
+		 owner = response.text;
+			};	
+			askStage(response, convo);
+			convo.next();
+	   });	
+
+	};
+
+   let askStage = (response, convo) => {
+	   convo.ask("Which Opportunity Stage Status?:" + "\n" + "1. All" + "\n" + "2. Closed Won" + "\n" + "3. Open", (response, convo) => {
+		   stage = response.text;
+		   
+		   if(stage.toUpperCase() == 'ALL' || stage.toUpperCase() == '1. ALL' || stage == '1' || stage == '1.')
+		   {
+			   stage = '%';
+			   askType(response, convo);
+			   convo.next();
+		   }
+		   else if (stage.toUpperCase() == 'CLOSED WON' || stage.toUpperCase() == '2. CLOSED WON' || stage == '2' || stage == '2.')
+		   {
+			   stage = 'Closed Won';
+			   askType(response, convo);
+			   convo.next();
+		   }
+		    else if (stage.toUpperCase() == 'OPEN' || stage.toUpperCase() == '3. OPEN' || stage == '3' || stage == '3.')
+		   {
+			   stage = 'Open';
+			   askType(response, convo);
+			   convo.next();
+		   }
+		   else
+			{
+			bot.reply(message, "Sorry that is not a valid option. Please try again.");				
+			askStage(response, convo);
+			convo.next();
+			}
+	   });
+   };	
+	
+	let askType = (response, convo) => {
+	   convo.ask("Which Opportunity Type?:" + "\n" + "1. All" + "\n" + "2. New" + "\n" + "3. Renewal" + "\n" + "4. Add On", (response, convo) => {
+		   type = response.text;
+				if(type.toUpperCase() == 'ALL' || type.toUpperCase() == '1. ALL' || type == '1' || type == '1.')
+				{
+					type = '%';
+				}
+				else if(type.toUpperCase() == 'NEW' || type.toUpperCase() == '2. NEW' || type == '2' || type == '2.')
+				{
+					type = 'New';
+				}
+				else if(type.toUpperCase() == 'RENEWAL' || type.toUpperCase() == '3. RENEWAL' || type == '3' || type == '3.')
+				{
+					type = 'Renewal';
+				}
+				else if(type.toUpperCase() == 'ADD ON' || type.toUpperCase() == '4. ADD ON' || type == '4' || type == '4.')
+				{
+					type = 'Add On';
+				}
+				else
+				{
+					bot.reply(message, "Sorry that is not a valid option. Please try again.");
+					askType(response, convo);
+					convo.next();
+				}
+			if(type == '%' || type == 'New' || type == 'Renewal' || type == 'Add On')
+			{
+				salesforce.findOpportunity4(type, owner, name, stage)
+				.then(opportunities => bot.reply(message, {
+				text: "Results:" ,
+				attachments: formatter.formatOpportunities(opportunities)
+				}));
+				convo.next();
+			}
+		
+
+		});
+	};
+
+ bot.reply(message, "OK, I can help you with that!");
+ bot.startConversation(message, askName);	
+ 
+});
+
+controller.hears(['Destroyself'], 'direct_message,direct_mention,mention', (bot, message) => {
+    bot.reply(message, {
+        text: `Goodbye`
     });
+	bot.destroy()
+});
 
-};
+
+controller.hears(['search account (.*)', 'search (.*) in accounts', '+a (.*)', 'find account (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    let name = message.match[1];
+    salesforce.findAccount(name)
+        .then(accounts => bot.reply(message, {
+            text: "I found these accounts matching  '" + name + "':",
+            attachments: formatter.formatAccounts(accounts)
+        }))
+        .catch(error => bot.reply(message, error));
+});
+
+controller.hears(['search accounts owned by (.*)', 'find accounts owned by (.*)', '+ao (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    let name = message.match[1];
+    salesforce.findAccount2(name)
+        .then(accounts => bot.reply(message, {
+            text: "I found these accounts owned by  '" + name + "':",
+            attachments: formatter.formatAccounts(accounts)
+        }))
+        .catch(error => bot.reply(message, error));
+});
 
 
-let findAccount2 = name => {
+controller.hears(['search contact (.*)', 'find contact (.*)', '+c (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    let name = message.match[1];
+    salesforce.findContact(name)
+        .then(contacts => bot.reply(message, {
+            text: "I found these contacts matching  '" + name + "':",
+            attachments: formatter.formatContacts(contacts)
+        }))
+        .catch(error => bot.reply(message, error));
+});
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Phone, Account_Owner__c  , Type, BillingStreet, BillingCity, BillingState FROM Account WHERE Account_Owner__c LIKE '%" + name + "%' LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                console.log(err);
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
+
+controller.hears(['search contacts in Account (.*)', 'find contacts in Account (.*)', '+co (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    let name = message.match[1];
+    salesforce.findContact2(name)
+        .then(contacts => bot.reply(message, {
+            text: "I found these contacts in Account '" + name + "':",
+            attachments: formatter.formatContacts(contacts)
+        }))
+        .catch(error => bot.reply(message, error));
+});
+
+
+controller.hears(['top (.*) deals', 'top (.*) opportunities'], 'direct_message,direct_mention,mention', (bot, message) => {
+    let count = message.match[1];
+    salesforce.getTopOpportunities(count)
+        .then(opportunities => bot.reply(message, {
+            text: "Here are your top " + count + " opportunities:",
+            attachments: formatter.formatOpportunities(opportunities)
+        }))
+        .catch(error => bot.reply(message, error));
+});
+
+controller.hears(['search opportunity (.*)', 'find opportunity (.*)', '+o (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+    let name = message.match[1];
+    salesforce.findOpportunity(name)
+        .then(opportunities => bot.reply(message, {
+            text: "I found these opportunities matching  '" + name + "':",
+            attachments: formatter.formatOpportunities(opportunities)
+        }))
+        .catch(error => bot.reply(message, error));
+
+});
+
+controller.hears(['search opportunities owned by (.*)', '+oo (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+    let name = message.match[1];
+    salesforce.findOpportunity2(name)
+        .then(opportunities => bot.reply(message, {
+            text: "I found these opportunities owned by  '" + name + "':",
+            attachments: formatter.formatOpportunities(opportunities)
+        }))
+        .catch(error => bot.reply(message, error));
+
+});
+
+controller.hears(['search opportunities in account (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+    let name = message.match[1];
+    salesforce.findOpportunity3(name)
+        .then(opportunities => bot.reply(message, {
+            text: "I found these opportunities in account  '" + name + "':",
+            attachments: formatter.formatOpportunities(opportunities)
+        }))
+        .catch(error => bot.reply(message, error));
+
+});
+
+controller.hears(['(.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    bot.reply(message, {
+        text: `I'm sorry, I didn't understand that. To learn how to make Salesforce requests please type 'help'.`
     });
+});
 
-};
 
+//controller.hears(['create case', 'new case'], 'direct_message,direct_mention,mention', (bot, message) => {
 
-let findAccount3 = (owner, name) => {
+ //   let subject,
+  //      description;
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Phone, Account_Owner__c  , Type, BillingStreet, BillingCity, BillingState FROM Account WHERE Account_Owner__c LIKE '%" + owner + "%' AND Name LIKE '%" + name + "%' LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                console.log(err);
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+ //  let askSubject = (response, convo) => {
 
-};
+    //    convo.ask("What's the subject?", (response, convo) => {
+   //         subject = response.text;
+   //         askDescription(response, convo);
+   //         convo.next();
+   //     });
 
-let findAccount4 = (owner, name, type) => {
+  //  };
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Phone, Account_Owner__c  , Type, BillingStreet, BillingCity, BillingState FROM Account WHERE Account_Owner__c LIKE '%" + owner + "%' AND Name LIKE '%" + name + "%' AND Type LIKE '"+ type + "' LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                console.log(err);
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+  //  let askDescription = (response, convo) => {
 
-};
+    //    convo.ask('Enter a description for the case', (response, convo) => {
+    //        description = response.text;
+    //        salesforce.createCase({subject: subject, description: description})
+    //            .then(_case => {
+      //              bot.reply(message, {
+      //                 text: "I created the case:",
+      //                  attachments: formatter.formatCase(_case)
+       //             });
+        //            convo.next();
+       //         })
+       //         .catch(error => {
+         //           bot.reply(message, error);
+          //          convo.next();
+       //         });
+        //});
 
-let findContact = name => {
+//};
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Account_Name_API__c, Name, Phone, Title, MobilePhone, Email FROM Contact WHERE Name LIKE '%" + name + "%' LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+  // bot.reply(message, "OK, I can help you with that!");
+  //  bot.startConversation(message, askSubject);
 
-};
+// });
 
-let findContact2 = name => {
+// controller.hears(['create contact', 'new contact'], 'direct_message,direct_mention,mention', (bot, message) => {
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Account_Name_API__c, Name, Phone, Title, MobilePhone, Email FROM Contact WHERE Account_Name_API__c LIKE '%" + name + "%' LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+   // let firstName,
+   //     lastName,
+   //     title,
+   //     phone;
 
-};
+ //   let askFirstName = (response, convo) => {
 
-let findContact3 = (account, name) => {
+   //     convo.ask("What's the first name?", (response, convo) => {
+    //        firstName = response.text;
+   //         askLastName(response, convo);
+    //        convo.next();
+    //    });
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Account_Name_API__c, Name, Phone, Title, MobilePhone, Email FROM Contact WHERE Account_Name_API__c LIKE '%" + account + "%' AND Name LIKE '%" + name + "%' LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+//    };
 
-};
+   // let askLastName = (response, convo) => {
 
-let findOpportunity = name => {
+     //   convo.ask("What's the last name?", (response, convo) => {
+     //       lastName = response.text;
+      //      askTitle(response, convo);
+        //    convo.next();
+   //    });
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Opp_Type__c, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Name LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+ //   };
 
-};
+ //   let askTitle = (response, convo) => {
 
-let findOpportunity2 = name => {
+   //     convo.ask("What's the title?", (response, convo) => {
+  //          title = response.text;
+    //        askPhone(response, convo);
+   //         convo.next();
+    //    });
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Opp_Type__c, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Opportunity_Owner__c LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+  //  };
 
-};
+    // let askPhone = (response, convo) => {
 
-let findOpportunity3 = name => {
+      //  convo.ask("What's the phone number?", (response, convo) => {
+      //      phone = response.text;
+       //     salesforce.createContact({firstName: firstName, lastName: lastName, title: title, phone: phone})
+       //         .then(contact => {
+       //             bot.reply(message, {
+      //                  text: "I created the contact:",
+       //                 attachments: formatter.formatContact(contact)
+      //              });
+       //             convo.next();
+       //         })
+       //         .catch(error => {
+       //            bot.reply(message, error);
+    //                convo.next();
+     //           });
+    //    });
 
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Opp_Type__c, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Opp_Account_Name_API__c LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
+  //  };
 
-};
+ //   bot.reply(message, "OK, I can help you with that!");
+  //  bot.startConversation(message, askFirstName);
 
-let findOpportunity4 = (type, owner, name, stage) => {
-
-    return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Amount, Opportunity_Record_Type__c, Opp_Type__c, Opp_Stage__c, Opportunity_Owner__c, Opp_Account_Name_API__c, Probability, StageName, CloseDate FROM Opportunity WHERE Opp_Type__c LIKE '" + type + "%' AND Opportunity_Owner__c LIKE '%" + owner + "%' AND Opp_Stage__c LIKE '%" + stage + "%' AND Opp_Account_Name_API__c LIKE '%" + name + "%' ORDER BY Probability DESC LIMIT 10";
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
-
-};
-
-let getTopOpportunities = count => {
-
-    count = count || 15;
-
-    return new Promise((resolve, reject) => {
-        var q = "SELECT Id, Name, Amount, Probability, StageName, CloseDate FROM Opportunity WHERE isClosed=false ORDER BY amount DESC LIMIT " + count;
-        org.query({query: q}, (err, resp) => {
-            if (err) {
-                console.error(err);
-                reject("An error as occurred");
-            } else {
-                resolve(resp.records);
-            }
-        });
-    });
-
-};
-
-let createContact = contact => {
-
-    return new Promise((resolve, reject) => {
-        let c = nforce.createSObject('Contact');
-        c.set('firstName', contact.firstName);
-        c.set('lastName', contact.lastName);
-        c.set('title', contact.title);
-        c.set('phone', contact.phone);
-        org.insert({sobject: c}, (err, resp) => {
-            if (err) {
-                console.error(err);
-                reject("An error occurred while creating a contact");
-            } else {
-                resolve(c);
-            }
-        });
-    });
-
-};
-
-let createCase = newCase => {
-
-    return new Promise((resolve, reject) => {
-        let c = nforce.createSObject('Case');
-        c.set('subject', newCase.subject);
-        c.set('description', newCase.description);
-        c.set('origin', 'Slack');
-        c.set('status', 'New');
-
-        org.insert({sobject: c}, err => {
-            if (err) {
-                console.error(err);
-                reject("An error occurred while creating a case");
-            } else {
-                resolve(c);
-            }
-        });
-    });
-
-};
-
-login();
-
-exports.org = org;
-exports.findAccount = findAccount;
-exports.findAccount2 = findAccount2;
-exports.findAccount3 = findAccount3;
-exports.findAccount4 = findAccount4;
-exports.findContact = findContact;
-exports.findContact2 = findContact2;
-exports.findContact3 = findContact3;
-exports.findOpportunity = findOpportunity;
-exports.findOpportunity2 = findOpportunity2;
-exports.findOpportunity3 = findOpportunity3;
-exports.findOpportunity4 = findOpportunity4;
-exports.getTopOpportunities = getTopOpportunities;
-exports.createContact = createContact;
-exports.createCase = createCase;
+// });
