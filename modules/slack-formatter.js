@@ -9,6 +9,9 @@ let formatAccounts = accounts => {
         accounts.forEach(account => {
             let fields = [];
             fields.push({title: "Name", value: account.get("Name"), short:true});
+            fields.push({title: "Link", value: "https://login.salesforce.com/" + account.getId(), short:true});
+            fields.push({title: "Owner", value: account.get("Account_Owner__c"), short:true});
+            fields.push({title: "Type", value: account.get("Type"), short:true});
             attachments.push({color: color, fields: fields});
         });
         return attachments;
