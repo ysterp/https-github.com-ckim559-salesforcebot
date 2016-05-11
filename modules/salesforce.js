@@ -97,7 +97,7 @@ let findAccount4 = (owner, name, type) => {
 let findContact = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Account_Name_API__c, Name, Phone, MobilePhone, Email FROM Contact WHERE Name LIKE '%" + name + "%' LIMIT 10";
+        let q = "SELECT Id, Account_Name_API__c, Name, Phone, Title, MobilePhone, Email FROM Contact WHERE Name LIKE '%" + name + "%' LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 reject("An error as occurred");
@@ -112,7 +112,7 @@ let findContact = name => {
 let findContact2 = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Account_Name_API__c, Name, Phone, MobilePhone, Email FROM Contact WHERE Account_Name_API__c LIKE '%" + name + "%' LIMIT 10";
+        let q = "SELECT Id, Account_Name_API__c, Name, Phone, Title, MobilePhone, Email FROM Contact WHERE Account_Name_API__c LIKE '%" + name + "%' LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 reject("An error as occurred");
@@ -127,7 +127,7 @@ let findContact2 = name => {
 let findContact3 = (account, name) => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Account_Name_API__c, Name, Phone, MobilePhone, Email FROM Contact WHERE Account_Name_API__c LIKE '%" + account + "%' AND Name LIKE '%" + name + "%' LIMIT 10";
+        let q = "SELECT Id, Account_Name_API__c, Name, Phone, Title, MobilePhone, Email FROM Contact WHERE Account_Name_API__c LIKE '%" + account + "%' AND Name LIKE '%" + name + "%' LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 reject("An error as occurred");
