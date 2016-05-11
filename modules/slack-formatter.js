@@ -31,8 +31,8 @@ let formatContacts = contacts => {
             fields.push({title: "Name", value: contact.get("Name"), short:true});
             fields.push({title: "Link", value: "https://login.salesforce.com/" + contact.getId(), short:true});
             fields.push({title: "Title", value: contact.get("Title"), short:true});
-			fields.push({title: "Account:", value: contact.get("Account_Name_API__c"), short:true});
-			fields.push({title: "Email", value: contact.get("Email"), short:true});
+	    fields.push({title: "Account:", value: contact.get("Account_Name_API__c"), short:true});
+	    fields.push({title: "Email", value: contact.get("Email"), short:true});
             fields.push({title: "Mobile", value: contact.get("MobilePhone"), short:true});
             attachments.push({color: color, fields: fields});
         });
