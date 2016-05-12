@@ -101,7 +101,7 @@ controller.hears(['Account Search', '#Accounts', '#Account', '#as'], 'direct_mes
 
         convo.ask("What is the Account Type?:" + "\n" + "1. All" + "\n" + "2. Prospect" + "\n" + "3. Client" + "\n" + "4. Former Client", (response, convo) => {
 		type = response.text; 
-		if(type.toUpperCase() == 'ALL' || type.toUpperCase() == '1. ALL' || type == '1' || type == '1.')
+		if(type.toUpperCase() == 'ALL' || type.toUpperCase() == '1. ALL' || type == '1' || type == '1.' || type == '%')
 			{
 				type = '%'; 
 				askOwner(response, convo);
@@ -271,7 +271,7 @@ controller.hears(['Opportunity Search', '#Opportunity', '#Opportunities', '#os']
 	   convo.ask("Which Opportunity Stage Status?:" + "\n" + "1. All" + "\n" + "2. Closed Won" + "\n" + "3. Open", (response, convo) => {
 		   stage = response.text;
 		   
-		   if(stage.toUpperCase() == 'ALL' || stage.toUpperCase() == '1. ALL' || stage == '1' || stage == '1.')
+		   if(stage.toUpperCase() == 'ALL' || stage.toUpperCase() == '1. ALL' || stage == '1' || stage == '1.' || stage == '%')
 		   {
 			   stage = '%';
 			   askType(response, convo);
@@ -301,7 +301,7 @@ controller.hears(['Opportunity Search', '#Opportunity', '#Opportunities', '#os']
 	let askType = (response, convo) => {
 	   convo.ask("Which Opportunity Type?:" + "\n" + "1. All" + "\n" + "2. New" + "\n" + "3. Renewal" + "\n" + "4. Add On", (response, convo) => {
 		   type = response.text;
-				if(type.toUpperCase() == 'ALL' || type.toUpperCase() == '1. ALL' || type == '1' || type == '1.')
+				if(type.toUpperCase() == 'ALL' || type.toUpperCase() == '1. ALL' || type == '1' || type == '1.' || type == '%')
 				{
 					type = '%';
 				}
