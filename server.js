@@ -151,7 +151,7 @@ controller.hears(['Account Search', '#Accounts', '#Account', '#as'], 'direct_mes
 			{
 				salesforce.findAccount3(owner, name)
 				.then(accounts => bot.reply(message, {
-				text: "Results:",
+				text: "Here are the matching accounts I found:",
 				attachments: formatter.formatAccounts(accounts)
 				}));
 			}
@@ -159,7 +159,7 @@ controller.hears(['Account Search', '#Accounts', '#Account', '#as'], 'direct_mes
 				{
 				salesforce.findAccount4(owner, name, type)
 				.then(accounts => bot.reply(message, {
-				text: "Results:",
+				text: "Here are the matching accounts I found:",
 				attachments: formatter.formatAccounts(accounts)
 				}));
 				}
@@ -211,7 +211,7 @@ controller.hears(['Contact Search', '#Contacts', '#Contact', '#cs'], 'direct_mes
 
 			salesforce.findContact3(account, name)
 			.then(contacts => bot.reply(message, {
-			text: "Results:",
+			text: "Here are the matching contacts I found:",
 			attachments: formatter.formatContacts(contacts)
 			}));
 			
@@ -327,7 +327,7 @@ controller.hears(['Opportunity Search', '#Opportunity', '#Opportunities', '#os']
 			{
 				salesforce.findOpportunity4(type, owner, name, stage)
 				.then(opportunities => bot.reply(message, {
-				text: "Results:" ,
+				text: "Here are the matching opportunities I found:" ,
 				attachments: formatter.formatOpportunities(opportunities)
 				}));
 				convo.next();
