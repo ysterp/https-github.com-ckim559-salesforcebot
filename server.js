@@ -46,7 +46,7 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
 		});
 		convo.next();
 	} 
-	else if(help.toUpperCase() == 'Contacts'|| help.toUpperCase() == '3. Contacts' || help == '3' || help == '3.')
+	else if(help.toUpperCase() == 'CONTACTS'|| help.toUpperCase() == '3. CONTACTS' || help == '3' || help == '3.')
 	{
 		bot.reply(message, {
 		text: `Contact Requests:
