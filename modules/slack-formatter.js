@@ -5,7 +5,7 @@
 let formatAccounts = accounts => {
     if (accounts && accounts.length>0) {
         let attachments = [];
-
+	color = "#009cdb";
         accounts.forEach(account => {
             let fields = [];
             fields.push({title: "Name", value: account.get("Name"), short:true});
@@ -26,7 +26,7 @@ let formatContacts = contacts => {
     
     if (contacts && contacts.length>0) {
         let attachments = [];
-        
+        color = "#dbad00";
         contacts.forEach(contact => {
             let fields = [];
             fields.push({title: "Name", value: contact.get("Name"), short:true});
@@ -45,9 +45,8 @@ let formatContacts = contacts => {
 };
 
 let formatContact = contact => {
-
+    color = "#dbad00";	
     let fields = [];
-    
     fields.push({title: "Name", value: contact.get("FirstName") + " " + contact.get("LastName"), short:true});
     fields.push({title: "Link", value: "https://login.salesforce.com/" + contact.getId(), short:true});
     fields.push({title: "Title", value: contact.get("Title"), short:true});
@@ -61,8 +60,8 @@ let formatContact = contact => {
 let formatOpportunities = opportunities => {
 
     if (opportunities && opportunities.length>0) {
+    	color = "#db002f";
         let attachments = [];
-
         opportunities.forEach(opportunity => {
             let fields = [];
             fields.push({title: "Opportunity", value: opportunity.get("Name"), short:true});
