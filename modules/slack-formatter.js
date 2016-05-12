@@ -3,7 +3,7 @@
 let color = "#009cdb";
 
 let formatAccounts = accounts => {
-
+    color = "#009cdb";
     if (accounts && accounts.length>0) {
         let attachments = [];
         accounts.forEach(account => {
@@ -23,7 +23,8 @@ let formatAccounts = accounts => {
 
 
 let formatContacts = contacts => {
-
+    color = #db002f;
+    
     if (contacts && contacts.length>0) {
         let attachments = [];
         contacts.forEach(contact => {
@@ -44,6 +45,7 @@ let formatContacts = contacts => {
 };
 
 let formatContact = contact => {
+    color = #db002f;
 
     let fields = [];
     fields.push({title: "Name", value: contact.get("FirstName") + " " + contact.get("LastName"), short:true});
@@ -57,6 +59,7 @@ let formatContact = contact => {
 };
 
 let formatOpportunities = opportunities => {
+	color = #dbad00;
 
     if (opportunities && opportunities.length>0) {
         let attachments = [];
