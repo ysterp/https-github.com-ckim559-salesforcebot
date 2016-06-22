@@ -31,7 +31,7 @@ let login = () => {
 let findAccount = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Phone, Account_Owner__c , Type , BillingStreet, BillingCity, BillingState FROM Account WHERE Name LIKE '%" + name + "%' LIMIT 10";
+        let q = "SELECT Id, Name, Phone, Account_Owner__c , Type , BillingStreet, BillingCity, BillingState, Region__c, AM_Text__c, SE_Text__c, PGM_Text__c FROM Account WHERE Name LIKE '%" + name + "%' LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 console.log(err);
@@ -48,7 +48,7 @@ let findAccount = name => {
 let findAccount2 = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Id, Name, Phone, Account_Owner__c  , Type, BillingStreet, BillingCity, BillingState FROM Account WHERE Account_Owner__c LIKE '%" + name + "%' LIMIT 10";
+        let q = "SELECT Id, Name, Phone, Account_Owner__c  , Type, BillingStreet, BillingCity, BillingState, Region__c, AM_Text__c, SE_Text__c, PGM_Text__c FROM Account WHERE Account_Owner__c LIKE '%" + name + "%' LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 console.log(err);
@@ -85,6 +85,21 @@ let findAccount4 = (owner, name, type) => {
         org.query({query: q}, (err, resp) => {
             if (err) {
                 console.log(err);
+                reject("An error as occurred");
+            } else {
+                resolve(resp.records);
+            }
+        });
+    });
+
+};
+
+let findUser = name => {
+
+    return new Promise((resolve, reject) => {
+        let q = "SELECT Full_Name_Text__c, MobilePhone, Title, Email FROM User WHERE Full_Name_Text__c LIKE '%" + name + "%' LIMIT 10";
+        org.query({query: q}, (err, resp) => {
+            if (err) {
                 reject("An error as occurred");
             } else {
                 resolve(resp.records);
@@ -280,6 +295,7 @@ exports.findAccount = findAccount;
 exports.findAccount2 = findAccount2;
 exports.findAccount3 = findAccount3;
 exports.findAccount4 = findAccount4;
+exports.findUser = findUser;
 exports.findContact = findContact;
 exports.findContact2 = findContact2;
 exports.findContact3 = findContact3;
