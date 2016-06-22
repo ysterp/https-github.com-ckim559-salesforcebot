@@ -60,7 +60,7 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
 	{
 		bot.reply(message, {
 		text: `User Requests:
-	- To search for a user you can ask me things like "Search user Cliff Kim" or "!U Cliff Kim"`
+	- To search for a user you can ask me things like "Search user Bob Varsha" or "!U Bob Varsha"`
 		});
 		convo.next();
 	}
