@@ -23,7 +23,7 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
    let help;
 	
    let askHelp = (response, convo) => {
-        convo.ask("Help Categories:" + "\n" + "1. Accounts" + "\n" + "2. Opportunities" + "\n" + "3. Contacts", (response, convo) => {
+        convo.ask("Help Categories:" + "\n" + "1. Accounts" + "\n" + "2. Opportunities" + "\n" + "3. Contacts" + "\n" + "4. Users", (response, convo) => {
 		help = response.text; 
    
    if(help.toUpperCase() == 'ACCOUNTS'|| help.toUpperCase() == '1. ACCOUNTS' || help == '1' || help == '1.')
@@ -53,6 +53,14 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
 	- To search for a contact you can ask me things like "Search contact Lisa Smith" or "!C Lisa Smith"
 	- To search for a contact in an account, ask me "Search contacts in account Twitter" or "!CO Twitter"
 	- For advanced search type "Contact Search" or "!CS"`
+		});
+		convo.next();
+	}
+	else if(help.toUpperCase() == 'USERS'|| help.toUpperCase() == '4. USERS' || help == '4' || help == '4.')
+	{
+		bot.reply(message, {
+		text: `User Requests:
+	- To search for a user you can ask me things like "Search user Cliff Kim" or "!U Cliff Kim"`
 		});
 		convo.next();
 	}
@@ -408,6 +416,17 @@ controller.hears(['Destroyself'], 'direct_message,direct_mention,mention', (bot,
 	bot.destroy()
 });
 
+controller.hears(['search user (.*)', 'find user (.*)', '!u (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+    let name = message.match[1];
+    salesforce.findUser(name)
+        .then(users => bot.reply(message, {
+            text: "I found these Users matching  '" + name + "':",
+            attachments: formatter.formatUsers(users)
+        }))
+        .catch(error => bot.reply(message, error));
+
+});
 
 controller.hears(['search account (.*)', 'search (.*) in accounts', '!a (.*)', 'find account (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     let name = message.match[1];
