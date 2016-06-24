@@ -7,7 +7,8 @@ let nforce = require('nforce'),
     SF_USER_NAME = process.env.SF_USER_NAME,
     SF_PASSWORD = process.env.SF_PASSWORD,
 
-   org = nforce.createConnection({
+  
+    org = nforce.createConnection({
         clientId: SF_CLIENT_ID,
         clientSecret: SF_CLIENT_SECRET,
         redirectUri: 'http://localhost:3000/oauth/_callback',
@@ -97,7 +98,22 @@ let findAccount4 = (owner, name, type) => {
 let findUser = name => {
 
     return new Promise((resolve, reject) => {
-        let q = "SELECT Full_Name_Text__c, MobilePhone, Title, Email FROM User WHERE Full_Name_Text__c LIKE '%" + name + "%' LIMIT 10";
+        let q = "SELECT Full_Name_Text__c, Department, Office_Locations__c, MobilePhone, Title, Email FROM User WHERE Full_Name_Text__c LIKE '%" + name + "%' LIMIT 10";
+        org.query({query: q}, (err, resp) => {
+            if (err) {
+                reject("An error as occurred");
+            } else {
+                resolve(resp.records);
+            }
+        });
+    });
+
+};
+
+let findUser2 = (name, department, office) => {
+
+    return new Promise((resolve, reject) => {
+        let q = "SELECT Full_Name_Text__c, Department, Office_Locations__c, MobilePhone, Title, Email FROM User WHERE Full_Name_Text__c LIKE '%" + name + "%' AND Department LIKE '%" + department + "%' AND Office_Locations__c LIKE '%" + office + "%' LIMIT 10";
         org.query({query: q}, (err, resp) => {
             if (err) {
                 reject("An error as occurred");
@@ -296,6 +312,7 @@ exports.findAccount2 = findAccount2;
 exports.findAccount3 = findAccount3;
 exports.findAccount4 = findAccount4;
 exports.findUser = findUser;
+exports.findUser2 = findUser2;
 exports.findContact = findContact;
 exports.findContact2 = findContact2;
 exports.findContact3 = findContact3;
