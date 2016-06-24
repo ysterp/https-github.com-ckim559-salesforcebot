@@ -8,7 +8,7 @@ let Botkit = require('botkit'),
 
     controller = Botkit.slackbot(),
 
-    bot = controller.spawn({
+  bot = controller.spawn({
         token: SLACK_BOT_TOKEN
     });
 
@@ -60,7 +60,8 @@ controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (b
 	{
 		bot.reply(message, {
 		text: `User Requests:
-	- To search for a user you can ask me things like "Search user Bob Varsha" or "!U Bob Varsha"`
+	- To search for a user you can ask me things like "Search user Bob Varsha" or "!U Bob Varsha"
+	- For advanced search type "User Search" or "!US"`
 		});
 		convo.next();
 	}
@@ -403,6 +404,75 @@ controller.hears(['Opportunity Search', '!Opportunity', '!Opportunities', '!os']
 
 		});
 	};
+
+ bot.reply(message, "OK, I can help you with that!");
+ bot.startConversation(message, askName);	
+ 
+});
+
+controller.hears(['User Search', '!User', '!Users', '!us'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+  let name,
+	  department,
+	  office;
+
+   let askName = (response, convo) => {
+
+        convo.ask("What is the user's name?  (or enter '%' for all names)", (response, convo) => {
+		name = response.text; 
+		 if(name == '%' || name == "'%'")
+			{
+			name = '%'; 
+			}
+		else {
+		 name = response.text;
+			};	
+		askDepartment(response, convo);
+		convo.next();
+		});
+
+   };
+   
+   let askDepartment = (response, convo) => {
+	   convo.ask("Which department is the user in? (or enter '%' for all departments)", (response, convo) => {
+		   department = response.text;
+		   
+		   if(department == '%' || department == "'%'")
+			{
+			department = '%'; 
+			}
+			
+		else {
+		 department = response.text;
+			 };	
+			 
+			askOffice(response, convo);
+			convo.next();
+	   });	
+
+	};
+
+   let askOffice = (response, convo) => {
+	   convo.ask("Which office is the user in? (or enter '%' for all departments)", (response, convo) => {
+		   office = response.text;
+		   
+		if(office == '%' || office == "'%'")
+			{
+			office = '%'; 
+			}
+		else{
+		    office = response.text;
+			};
+   
+			salesforce.findUser2(name, department, office)
+			.then(users => bot.reply(message, {
+			text: "Here are the matching users I found:" ,
+			attachments: formatter.formatUsers(users)
+			}));
+				
+			convo.next();
+		});	
+	};	
 
  bot.reply(message, "OK, I can help you with that!");
  bot.startConversation(message, askName);	
