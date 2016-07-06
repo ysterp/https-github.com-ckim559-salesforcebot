@@ -474,9 +474,9 @@ controller.hears(['User Search', '!User', '!Users', '!us'], 'direct_message,dire
 				else
 				{
 					bot.reply(message, "Sorry that is not a valid option. Please try again.");
-					askoffice(response, convo);
+					askOffice(response, convo);
 					convo.next();
-				};
+				}
 				
 	   });	
 
