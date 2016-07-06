@@ -18,6 +18,11 @@ bot.startRTM(err => {
     }
 });
 
+var http = require("http");
+setInterval(function() {
+    http.get("http://sbotcliff.herokuapp.com");
+}, 300000); // every 5 minutes (300000)
+
 controller.hears(['help', "'help'"], 'direct_message,direct_mention,mention', (bot, message) => {
 	
    let help;
