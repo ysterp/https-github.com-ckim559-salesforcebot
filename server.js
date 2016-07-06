@@ -438,28 +438,38 @@ controller.hears(['User Search', '!User', '!Users', '!us'], 'direct_message,dire
 
    };
 
-   let askOffice = (response, convo) => {
+  let askOffice = (response, convo) => {
 	    convo.ask("Which office is the User located in?:" + "\n" + "1. All" + "\n" + "2. New York" + "\n" + "3. San Mateo" + "\n" + "4. London" + "\n" + "5. Remote Office", (response, convo) => {
 		   office = response.text;
 				if(office.toUpperCase() == 'ALL' || office.toUpperCase() == '1. ALL' || office == '1' || office == '1.' || office == '%')
 				{
 					office = '%';
+					askDepartment(response, convo);
+					convo.next();
 				}
 				else if(office.toUpperCase() == 'NEW YORK' || office.toUpperCase() == '2. NEW YORK' || office == '2' || office == '2.')
 				{
 					office = 'NYO';
+					askDepartment(response, convo);
+					convo.next();
 				}
 				else if(office.toUpperCase() == 'SAN MATEO' || office.toUpperCase() == '3. SAN MATEO' || office == '3' || office == '3.')
 				{
 					office = 'SMO';
+					askDepartment(response, convo);
+					convo.next();
 				}
 				else if(office.toUpperCase() == 'LONDON' || office.toUpperCase() == '4. LONDON' || office == '4' || office == '4.')
 				{
 					office = 'UKO';
+					askDepartment(response, convo);
+					convo.next();
 				}
 				else if(office.toUpperCase() == 'REMOTE OFFICE' || office.toUpperCase() == '5. REMOTE OFFICE' || office == '5' || office == '5.')
 				{
 					office = 'Remote';
+					askDepartment(response, convo);
+					convo.next();
 				}
 				else
 				{
@@ -468,9 +478,6 @@ controller.hears(['User Search', '!User', '!Users', '!us'], 'direct_message,dire
 					convo.next();
 				};
 				
-			askDepartment(response, convo);
-			convo.next();
-	
 	   });	
 
 	};
